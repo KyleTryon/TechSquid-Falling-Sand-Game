@@ -23,7 +23,7 @@ export class SParticle extends PIXI.Graphics {
     super();
     this.type = properties.type || SPARTICLE_TYPE.SAND;
     this.stage = properties.stage;
-    this.size = properties.size || 1;
+    this.size = properties.size || 6;
     this.sphysicsBody = new SPhysicsBody({
       position: new Vector2(properties.position.x, properties.position.y),
       velocity: new Vector2(0, 0),

@@ -5,6 +5,7 @@ Click to spawn particles of sand.
 
 **TO DO:**
 * collision physics
+  * need a system to detect which directions are possible to move in
 * enable more particle types
 * create particle interaction system
 

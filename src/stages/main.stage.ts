@@ -10,8 +10,10 @@ export default class Stage extends PIXI.Container {
   readonly renderer: PIXI.Renderer | PIXI.AbstractRenderer;
   graphics: PIXI.Graphics;
   particles: SParticle[] = [];
-  physics: SPhysicsManager = new SPhysicsManager();
+  physics: SPhysicsManager
   worldTemperature: number = 23;
+  private _frameCount: number = 0;
+  private _lastDrawnParticleFrame: number = 0;
 
   constructor(
     renderer: PIXI.Renderer | PIXI.AbstractRenderer,
@@ -27,6 +29,9 @@ export default class Stage extends PIXI.Container {
     this.graphics = new PIXI.Graphics();
     this.hitArea = new PIXI.Rectangle(0, 0, width, height);
     this.interactive = true;
+    this.physics = new SPhysicsManager({
+      roomBounds: new Vector2(width, height),
+    });
     const temppos = new Vector2(300, 10);
     const initparticle = SParticleFactory.createParticle({
       type: SPARTICLE_TYPE.SAND,
@@ -38,6 +43,7 @@ export default class Stage extends PIXI.Container {
   }
 
   update(delta: number) {
+    this._frameCount++;
     if (this._inputController.isDragging) {
       this._userDrawParticles();
     }
@@ -48,8 +54,9 @@ export default class Stage extends PIXI.Container {
   }
 
   private _userDrawParticles() {
-    const doDraw = Math.random() < 0.25;
+    const doDraw = (this._frameCount - this._lastDrawnParticleFrame) > 5;
     if (doDraw) {
+      this._lastDrawnParticleFrame = this._frameCount;
       const newParticle = SParticleFactory.createParticle({
         type: this._inputController.selectedParticle,
         stage: this,
