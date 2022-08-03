@@ -36,10 +36,13 @@ export class SPhysicsManager {
             return p;
           } return
         })
-        this.checkCollisions(particle, pcheck);
+        const collidesWith = this._checkCollisions(particle, pcheck);
+        this._checkSides(particle, collidesWith);
         
         if (!particle.sphysicsBody.isAtRest) {
-          particle.addForce(new Vector2(0, this.gravity * delta));
+          if (! particle.sphysicsBody.sides.down.isBlocked) {
+            particle.addForce(new Vector2(0, this.gravity * delta));
+          }
           nextPosition = new Vector2(
             particle.sphysicsBody.position.x,
             particle.sphysicsBody.position.y
@@ -53,17 +56,42 @@ export class SPhysicsManager {
   }
 
   //Check for collisions between particles
-  checkCollisions(particleA: SParticle, particles: SParticle[]): void {
+  _checkCollisions(particleA: SParticle, particles: SParticle[]): SParticle[] {
+    const collidedWith: SParticle[] = []
     particles.forEach((particleB) => {
       if (particleA.sphysicsBody.position.x + (particleA.width / 2) > particleB.sphysicsBody.position.x - (particleB.width / 2) &&
         particleA.sphysicsBody.position.x - (particleA.width / 2) < particleB.sphysicsBody.position.x + (particleB.width / 2) &&
         particleA.sphysicsBody.position.y + (particleA.height / 2) > particleB.sphysicsBody.position.y - (particleB.height / 2) &&
         particleA.sphysicsBody.position.y - (particleA.height / 2) < particleB.sphysicsBody.position.y + (particleB.height / 2)) {
-        particleA.sphysicsBody.isAtRest = true;
-        particleB.sphysicsBody.isAtRest = true;
+      collidedWith.push(particleB)
       }
     })
+    return collidedWith
   }
+
+  //Locate which sides of are blocked by collisions
+  _checkSides(particleA: SParticle, collidedWith: SParticle[]): void {
+    if (collidedWith.length > 0) {
+      collidedWith.forEach(particleB => {
+        // Locate which sides of the particle are blocked by the collision
+          // if right side
+        if (particleB.sphysicsBody.position.x > particleA.sphysicsBody.position.x + (particleA.width / 2)) {
+          // right side
+          particleA.sphysicsBody.sides.right = {isBlocked: true, particle: particleB};
+        } else if (particleB.sphysicsBody.position.x < particleA.sphysicsBody.position.x - (particleA.width / 2)) {
+          // left side
+          particleA.sphysicsBody.sides.left = {isBlocked: true, particle: particleB};
+        } else if (particleB.sphysicsBody.position.y > particleA.sphysicsBody.position.y + (particleA.height / 2)) {
+          // bottom side
+          particleA.sphysicsBody.sides.down = {isBlocked: true, particle: particleB};
+        } else if (particleB.sphysicsBody.position.y < particleA.sphysicsBody.position.y - (particleA.height / 2)) {
+          // top side
+          particleA.sphysicsBody.sides.up = {isBlocked: true, particle: particleB};
+        }
+      })
+    }
+  }
+
 
   // Check if a collision will occur when attempting to move to the next position
   _checkWalls(particle: SParticle): void {
