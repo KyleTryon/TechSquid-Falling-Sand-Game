@@ -1,3 +1,4 @@
+import { SParticle } from "../gameObjects/SParticle";
 import { Material } from "../types/Material.types";
 import { Vector2 } from "../utils/Math";
 
@@ -9,6 +10,18 @@ export interface SPhysicsBodyProperties {
   temperature?: number;
   gravity?: Vector2;
 }
+
+export interface SBodySides {
+  up: SBodySide;
+  down: SBodySide;
+  left: SBodySide;
+  right: SBodySide;
+}
+
+export type SBodySide = {
+    isBlocked: boolean;
+    particle?: SParticle;
+};
 
 export class SPhysicsBody {
   allowCollision: boolean = true;
@@ -22,7 +35,13 @@ export class SPhysicsBody {
   private static _maxVelocity = 1000;
   temperature: number = 23;
   velocity: Vector2;
-  isAtRest: boolean = false
+  isAtRest: boolean = false;
+  sides: SBodySides = {
+    up: { isBlocked: false },
+    down: { isBlocked: false },
+    left: { isBlocked: false },
+    right: { isBlocked: false }
+  }
 
   constructor(SPhysicsBodyProperties: SPhysicsBodyProperties) {
 
